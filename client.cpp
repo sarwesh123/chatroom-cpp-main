@@ -14,6 +14,8 @@
 
 using namespace std;
 
+//code begins by creating a socket and connecting to the server using the socket() and connect() functions.
+
 bool exit_flag=false;
 thread t_send, t_recv;
 int client_socket;
@@ -25,6 +27,12 @@ string color(int code);
 void eraseText(int cnt);
 void send_message(int client_socket);
 void recv_message(int client_socket);
+
+
+// `main` function creates a socket, connects to the server, and sends the user's name.
+// - It then launches two threads for sending and receiving messages (`t1` and `t2`).
+// - The `main` function waits for both threads to finish their execution, ensuring the program doesn't terminate prematurely.
+
 
 int main()
 {
@@ -68,6 +76,9 @@ int main()
 	return 0;
 }
 
+//The catch_ctrl_c function is invoked when the client presses Ctrl+C. It sends an exit message to the server, gracefully detaches threads, and closes the client socket.
+
+
 // Handler for "Ctrl + C"
 void catch_ctrl_c(int signal) 
 {
@@ -79,6 +90,7 @@ void catch_ctrl_c(int signal)
 	close(client_socket);
 	exit(signal);
 }
+//- The `color` function determines the text color for the client's messages based on their unique ID.
 
 string color(int code)
 {
@@ -86,6 +98,8 @@ string color(int code)
 }
 
 // Erase text from terminal
+// The `eraseText` function is used to clear text on the client's terminal, providing a cleaner chatroom interface.
+
 void eraseText(int cnt)
 {
 	char back_space=8;
@@ -96,6 +110,9 @@ void eraseText(int cnt)
 }
 
 // Send message to everyone
+
+//- The `send_message` function allows the client to input messages, which are sent to the server.
+
 void send_message(int client_socket)
 {
 	while(1)
@@ -115,6 +132,8 @@ void send_message(int client_socket)
 }
 
 // Receive message
+//- The `recv_message` function continuously receives and displays messages from the server and other clients.
+
 void recv_message(int client_socket)
 {
 	while(1)

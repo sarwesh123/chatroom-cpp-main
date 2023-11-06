@@ -15,9 +15,8 @@
 
 #define MAX_LEN 200
 #define NUM_COLORS 6
-
 using namespace std;
-
+//to store information about connected clients
 struct terminal
 {
     int id;
@@ -28,11 +27,12 @@ struct terminal
 
     terminal() : active(true) {}
 };
-
+//used to maintain a list of connected clients
 vector<terminal> clients;
 string def_col = "\033[0m";
 string colors[] = {"\033[31m", "\033[32m", "\033[33m", "\033[34m", "\033[35m", "\033[36m"};
 int seed = 0;
+//is used to synchronize access to the standard output (cout). This ensures that multiple threads don't interfere with console printing
 mutex cout_mtx, clients_mtx;
 condition_variable cv;
 
@@ -58,13 +58,13 @@ int main()
     server.sin_port = htons(0); // Use dynamic port allocation
     server.sin_addr.s_addr = INADDR_ANY;
     bzero(&server.sin_zero, 0);
-
+//It binds to an available port using the bind() function with a dynamic port allocation (0), allowing the operating system to assign a free port.
     if ((bind(server_socket, (struct sockaddr *)&server, sizeof(struct sockaddr_in))) == -1)
     {
         perror("bind error: ");
         exit(-1);
     }
-
+//The server listens for incoming connections with a maximum queue length of 8 using listen().
     if ((listen(server_socket, 8)) == -1)
     {
         perror("listen error: ");
@@ -87,7 +87,10 @@ int main()
         }
         seed++;
         thread t(handle_client, client_socket, seed);
+        // Locks the mutex
+    // Critical section: Access and modify shared resources
         lock_guard<mutex> guard(clients_mtx);
+   // lock_guard goes out of scope and automatically unlocks the mutex
         clients.push_back({seed, "Anonymous", client_socket, move(t)});
     }
 
@@ -105,7 +108,7 @@ string color(int code)
 {
     return colors[code % NUM_COLORS];
 }
-
+//The set_name function sets the name for a client based on their unique ID.
 void set_name(int id, const string &name)
 {
     for (int i = 0; i < clients.size(); i++)
@@ -136,6 +139,8 @@ void broadcast_message(const string &message, int sender_id)
     }
 }
 
+// Two broadcast_message functions are used to send messages to all clients. One sends text messages, and the other sends integer values.
+// These functions iterate through the clients vector and send messages to all clients except the sender.
 void broadcast_message(int num, int sender_id)
 {
     for (int i = 0; i < clients.size(); i++)
@@ -146,13 +151,14 @@ void broadcast_message(int num, int sender_id)
         }
     }
 }
-
+//The end_connection function is responsible for disconnecting a client, stopping their thread, and updating the clients vector.
 void end_connection(int id)
 {
     for (int i = 0; i < clients.size(); i++)
     {
         if (clients[i].id == id)
         {
+            //Throughout the code, lock_guard is used with mutexes to ensure thread safety. This ensures that only one thread can access shared resources or critical sections at a time.
             lock_guard<mutex> guard(clients_mtx);
             clients[i].th.detach();
             clients[i].active = false;
@@ -162,6 +168,10 @@ void end_connection(int id)
         }
     }
 }
+
+// The handle_client function is executed in a separate thread for each connected client. It manages communication with the client.
+// The function starts by receiving the client's name, displays a welcome message to all clients, and handles incoming and outgoing messages.
+// Messages are broadcasted to all connected clients except the sender.
 
 void handle_client(int client_socket, int id)
 {

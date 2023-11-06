@@ -1,8 +1,10 @@
 client
 server  
 MultiThreading.cpp
+screenshot.png
 a.out
 c.exe
-screenshot.png
 nul
-settings.json
+
+
+
