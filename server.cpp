@@ -81,6 +81,7 @@ int main()
 
     while (1)
     {
+        //extracts the first connection request on the queue of pending connections for the listening socket, sockfd, creates a new connected socket, and returns a new file descriptor referring to that socket. At this point, the connection is established between client and server, and they are ready to transfer data.
         if ((client_socket = accept(server_socket, (struct sockaddr *)&client, &len)) == -1)
         {
             perror("accept error: ");
