@@ -58,6 +58,7 @@ int main()
     server.sin_port = htons(0); // Use dynamic port allocation
     server.sin_addr.s_addr = INADDR_ANY;
     bzero(&server.sin_zero, 0);
+    // binds the socket to the address and port number specified
 //It binds to an available port using the bind() function with a dynamic port allocation (0), allowing the operating system to assign a free port.
     if ((bind(server_socket, (struct sockaddr *)&server, sizeof(struct sockaddr_in))) == -1)
     {
